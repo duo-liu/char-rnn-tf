@@ -12,7 +12,7 @@ config_tf.intra_op_parallelism_threads = 1
 
 config = Config.Config()
 
-char_to_idx, idx_to_char = _pickle.load(open(config.model_path + '/vocab.txt', 'rb'))
+char_to_idx, idx_to_char = _pickle.load(open(config.model_dir + '/vocab.bin', 'rb'))
 
 config.vocab_size = len(char_to_idx)
 is_sample = config.is_sample

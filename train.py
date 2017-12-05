@@ -24,7 +24,7 @@ idx_to_char = {i: ch for i, ch in enumerate(chars)}
 config = Config.Config()
 config.vocab_size = _vocab_size
 
-_pickle.dump((char_to_idx, idx_to_char), open(config.model_path + '/vocab.txt', 'wb'))
+_pickle.dump((char_to_idx, idx_to_char), open(config.model_dir + '/vocab.bin', 'wb'))
 
 context_of_idx = [char_to_idx[ch] for ch in data]
 

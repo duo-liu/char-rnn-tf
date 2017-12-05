@@ -9,7 +9,8 @@ class Config(object):
     keep_prob = 0.5
     batch_size = 128
     ckpt_steps = 2000
-    model_path = '/home/liuduo/ckpt/model.ckpt'  # the path of model that need to save or load
+    model_dir = '/home/liuduo/ckpt'
+    model_path = model_dir + '/model.ckpt'  # the path of model that need to save or load
 
     # parameters for generation
     is_sample = True  # true means using sample, if not using max
