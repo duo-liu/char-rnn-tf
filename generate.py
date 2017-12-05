@@ -12,7 +12,7 @@ config_tf.intra_op_parallelism_threads = 1
 
 config = Config.Config()
 
-char_to_idx, idx_to_char = _pickle.load(open(config.model_path + '.voc', 'r'))
+char_to_idx, idx_to_char = _pickle.load(open(config.model_path + '/vocab.txt', 'rb'))
 
 config.vocab_size = len(char_to_idx)
 is_sample = config.is_sample
@@ -45,7 +45,7 @@ def main(_):
 
         model_saver = tf.train.Saver()
         print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + ' ' + 'model loading ...')
-        model_saver.restore(session, config.model_path)
+        model_saver.restore(session, tf.train.get_checkpoint_state(config.model_path).model_checkpoint_path)
         print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + ' ' + 'Done!')
 
         if not is_beams:

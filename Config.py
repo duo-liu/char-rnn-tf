@@ -8,7 +8,7 @@ class Config(object):
     iteration = 30
     keep_prob = 0.5
     batch_size = 128
-    ckpt_steps = 200
+    ckpt_steps = 200 
     model_path = '/home/liuduo/ckpt'  # the path of model that need to save or load
 
     # parameters for generation
@@ -16,4 +16,4 @@ class Config(object):
     is_beams = True  # whether or not using beam search
     beam_size = 25  # size of beam search
     len_of_generation = 100  # The number of characters by generated
-    start_sentence = 'how about we have a dinner tomorrow night'  # the seed sentence to generate text
+    start_sentence = 'Our business is not unknown to the senate'  # the seed sentence to generate text

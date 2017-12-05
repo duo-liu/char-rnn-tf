@@ -1,4 +1,3 @@
-# coding:utf-8
 import tensorflow as tf
 import sys
 import numpy as np
@@ -25,7 +24,7 @@ idx_to_char = {i: ch for i, ch in enumerate(chars)}
 config = Config.Config()
 config.vocab_size = _vocab_size
 
-_pickle.dump((char_to_idx, idx_to_char), open(config.model_path + '.voc', 'w'), protocol=_pickle.HIGHEST_PROTOCOL)
+_pickle.dump((char_to_idx, idx_to_char), open(config.model_path + '/vocab.txt', 'wb'))
 
 context_of_idx = [char_to_idx[ch] for ch in data]
 
@@ -74,7 +73,8 @@ def run_epoch(session, m, data, eval_op):
                  (time.time() - start_time)))
             start_time = time.time()
         if step % config.ckpt_steps == 0:
-            model_saver.save(session, config.model_path + '-%d' % step)
+            model_saver.save(session, config.model_path)
+            print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + ' ' + 'Saved model,step: ' + str(step))
 
     return np.exp(costs / iters)
 
