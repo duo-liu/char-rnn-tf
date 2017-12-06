@@ -11,10 +11,3 @@ class Config(object):
     ckpt_steps = 2000
     model_dir = '/home/liuduo/ckpt'
     model_path = model_dir + '/model.ckpt'  # the path of model that need to save or load
-
-    # parameters for generation
-    is_sample = True  # true means using sample, if not using max
-    is_beams = True  # whether or not using beam search
-    beam_size = 25  # size of beam search
-    len_of_generation = 100  # The number of characters by generated
-    start_sentence = 'Our business is not unknown to the senate'  # the seed sentence to generate text
