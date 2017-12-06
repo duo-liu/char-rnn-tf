@@ -20,13 +20,15 @@ flags.DEFINE_boolean('is_sample', False, '')
 flags.DEFINE_boolean('is_beams', True, '')
 flags.DEFINE_integer('beam_size', 5, '')
 flags.DEFINE_integer('len_of_generation', 50, '')
+flags.DEFINE_string('input_path','/home/liuduo/ckpt/test_input','')
+flags.DEFINE_string('output_path','/home/liuduo/ckpt/test_output','')
 FLAGS = flags.FLAGS
 is_sample = FLAGS.is_sample
 is_beams = FLAGS.is_beams
 beam_size = FLAGS.beam_size
 len_of_generation = FLAGS.len_of_generation
 start_sentence_list = [x.strip().replace('\n', '').lower() for x in open(FLAGS.input_path).readlines()]
-output_fd = open(FLAGS.output_path)
+output_fd = open(FLAGS.output_path,'w')
 
 
 def run_epoch(session, m, data, eval_op, state=None):
