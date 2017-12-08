@@ -90,6 +90,12 @@ def main(_):
 
         tf.global_variables_initializer().run()
 
+        saver = tf.train.Saver()
+        ckpt = tf.train.get_checkpoint_state(config.model_dir)
+        if ckpt and ckpt.model_checkpoint_path:
+            print("Continue to train the model,checkpoint file is: " + ckpt.model_checkpoint_path)
+            saver.restore(session, ckpt.model_checkpoint_path)
+
         for i in range(config.iteration):
             print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + ' ' + "Training Epoch: %d ..." % (i + 1))
             train_perplexity = run_epoch(session, m, train_data, m.train_op)
