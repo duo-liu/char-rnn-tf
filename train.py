@@ -5,6 +5,7 @@ import _pickle
 import Config
 import Model
 import time
+import os
 
 config_tf = tf.ConfigProto()
 config_tf.gpu_options.allow_growth = True
@@ -18,8 +19,11 @@ chars = list(set(data))  # char vocabulary
 data_size, _vocab_size = len(data), len(chars)
 print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + ' ' + 'data has %d characters, %d unique.' % (
     data_size, _vocab_size))
-char_to_idx = {ch: i for i, ch in enumerate(chars)}
-idx_to_char = {i: ch for i, ch in enumerate(chars)}
+if data_size == 707400467 and os.path.exists(Config.Config().model_dir + '/vocab.bin'):
+    char_to_idx, idx_to_char = _pickle.load(open(Config.Config().model_dir + '/vocab.bin', 'rb'))
+else:
+    char_to_idx = {ch: i for i, ch in enumerate(chars)}
+    idx_to_char = {i: ch for i, ch in enumerate(chars)}
 
 config = Config.Config()
 config.vocab_size = _vocab_size
