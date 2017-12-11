@@ -20,15 +20,15 @@ flags.DEFINE_boolean('is_sample', False, '')
 flags.DEFINE_boolean('is_beams', True, '')
 flags.DEFINE_integer('beam_size', 5, '')
 flags.DEFINE_integer('len_of_generation', 50, '')
-flags.DEFINE_string('input_path','/home/liuduo/ckpt/test_input','')
-flags.DEFINE_string('output_path','/home/liuduo/ckpt/test_output','')
+flags.DEFINE_string('input_path', '/home/liuduo/ckpt/test_input', '')
+flags.DEFINE_string('output_path', '/home/liuduo/ckpt/test_output', '')
 FLAGS = flags.FLAGS
 is_sample = FLAGS.is_sample
 is_beams = FLAGS.is_beams
 beam_size = FLAGS.beam_size
 len_of_generation = FLAGS.len_of_generation
 start_sentence_list = [x.strip().replace('\n', '').lower() for x in open(FLAGS.input_path).readlines()]
-output_fd = open(FLAGS.output_path,'w')
+output_fd = open(FLAGS.output_path, 'w')
 
 
 def run_epoch(session, m, data, eval_op, state=None):
@@ -131,6 +131,9 @@ def main(_):
                     beam_candidates.append((b[0] + y1[wordix], b[1] + [idx_to_char[wordix]], wordix, _state))
                 beam_candidates.sort(key=lambda x: x[0], reverse=True)  # decreasing order
                 beams = beam_candidates[:beam_size]  # truncate to get new beams
+                output_debug_lines = list()
+                output_debug_lines.extend(get_beams_result_lines(beams))
+                output_debug_lines.append(50 * '*' + '\n')
                 for xy in range(len_of_generation - 1):
                     beam_candidates = []
                     for b in beams:
@@ -147,6 +150,9 @@ def main(_):
                             beam_candidates.append((b[0] + y1[wordix], b[1] + [idx_to_char[wordix]], wordix, _state))
                     beam_candidates.sort(key=lambda x: x[0], reverse=True)  # decreasing order
                     beams = beam_candidates[:beam_size]  # truncate to get new beams
+                    output_debug_lines.extend(get_beams_result_lines(beams))
+                    output_debug_lines.append(50 * '*' + '\n')
+                open('/home/liuduo/ckpt/test_output_debug', 'w').writelines(output_debug_lines)
                 output_lines = list()
                 output_lines.append(start_sentence)
                 for i in range(beam_size):
@@ -155,6 +161,13 @@ def main(_):
                 output_fd.flush()
                 print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + ' ' + 'Generated Result: ',
                       ''.join(beams[0][1]))
+
+
+def get_beams_result_lines(beams):
+    result_lines = list()
+    for _, x, _, _ in beams:
+        result_lines.append(''.join(x) + '\n')
+    return result_lines
 
 
 if __name__ == "__main__":
