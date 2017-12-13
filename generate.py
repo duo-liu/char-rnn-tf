@@ -129,6 +129,7 @@ def main(_):
                 for i in range(beam_size):
                     wordix = top_indices[i]
                     beam_candidates.append((b[0] + y1[wordix], b[1] + [idx_to_char[wordix]], wordix, _state))
+                    print('*****: ' + str(prob.reshape(-1)[wordix]) + '\t' + '$' + idx_to_char[wordix] + '$')
                 beam_candidates.sort(key=lambda x: x[0], reverse=True)  # decreasing order
                 beams = beam_candidates[:beam_size]  # truncate to get new beams
                 for xy in range(len_of_generation - 1):
@@ -145,6 +146,7 @@ def main(_):
                         for i in range(beam_size):
                             wordix = top_indices[i]
                             beam_candidates.append((b[0] + y1[wordix], b[1] + [idx_to_char[wordix]], wordix, _state))
+                            print('*****: ' + str(prob.reshape(-1)[wordix]) + '\t' + '$' + idx_to_char[wordix] + '$')
                     beam_candidates.sort(key=lambda x: x[0], reverse=True)  # decreasing order
                     beams = beam_candidates[:beam_size]  # truncate to get new beams
                 output_lines = list()
