@@ -5,7 +5,7 @@ import Config
 import Model
 import time
 import math
-from collections import OrderedDict
+import csv
 
 config_tf = tf.ConfigProto()
 config_tf.gpu_options.allow_growth = True
@@ -45,75 +45,59 @@ def main(_):
         print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + ' ' + 'Done!')
 
         # dictation、correction、replacement、nonsense
-        test_pairs = [("this wasn't because of anything you did.", 'but it is being canceled and i need you to delete it off of your pay pal'),
-                      ('How about we have a dinner tomorrow night?', 'hello world'),
-                      ('How about we have a dinner tomorrow night?', 'if you want'),
-                      ('How about we have a dinner tomorrow night?', 'What is your name'),
-                      ('How about we have a dinner tomorrow night?',
-                       'but it is being canceled and i need you to delete it off of your pay pal'),
-                      ('I look forward to working with you in the following months.', 'lunch'),
-                      ('I look forward to working with you in the following months.', 'hello world'),
-                      ('I look forward to working with you in the following months.', 'if you want'),
-                      ('I look forward to working with you in the following months.', 'What is your name'),
-                      ('I look forward to working with you in the following months.',
-                       'but it is being canceled and i need you to delete it off of your pay pal'),
-                      ("What's the weather tomorrow?", 'lunch'),
-                      ("What's the weather tomorrow?", 'hello world'),
-                      ("What's the weather tomorrow?", 'if you want'),
-                      ("What's the weather tomorrow?", 'What is your name'),
-                      ("What's the weather tomorrow?",
-                       'but it is being canceled and i need you to delete it off of your pay pal'),
-                      ("i can't even talk correctly.", 'lunch'),
-                      ("i can't even talk correctly.", 'hello world'),
-                      ("i can't even talk correctly.", 'if you want'),
-                      ("i can't even talk correctly.", 'What is your name'),
-                      ("i can't even talk correctly.",
-                       'but it is being canceled and i need you to delete it off of your pay pal'),
-                      ("don't worry about the car seat tomorrow.", 'lunch'),
-                      ("don't worry about the car seat tomorrow.", 'hello world'),
-                      ("don't worry about the car seat tomorrow.", 'if you want'),
-                      ("don't worry about the car seat tomorrow.", 'What is your name'),
-                      ("don't worry about the car seat tomorrow.",
-                       'but it is being canceled and i need you to delete it off of your pay pal'),
-                      ("as long as everything stays the same,", 'lunch'),
-                      ("as long as everything stays the same,", 'hello world'),
-                      ("as long as everything stays the same,", 'if you want'),
-                      ("as long as everything stays the same,", 'What is your name'),
-                      ("as long as everything stays the same,",
-                       'but it is being canceled and i need you to delete it off of your pay pal'),
-                      ("i'll let you know when i close.", 'lunch'),
-                      ("i'll let you know when i close.", 'hello world'),
-                      ("i'll let you know when i close.", 'if you want'),
-                      ("i'll let you know when i close.", 'What is your name'),
-                      ("i'll let you know when i close.",
-                       'but it is being canceled and i need you to delete it off of your pay pal'),
-                      ("i want to hang out with my friends,", 'lunch'),
-                      ("i want to hang out with my friends,", 'hello world'),
-                      ("i want to hang out with my friends,", 'if you want'),
-                      ("i want to hang out with my friends,", 'What is your name'),
-                      ("i want to hang out with my friends,",
-                       'but it is being canceled and i need you to delete it off of your pay pal'),
-                      ("i'm really not feeling good today dad.", 'lunch'),
-                      ("i'm really not feeling good today dad.", 'hello world'),
-                      ("i'm really not feeling good today dad.", 'if you want'),
-                      ("i'm really not feeling good today dad.", 'What is your name'),
-                      ("i'm really not feeling good today dad.",
-                       'but it is being canceled and i need you to delete it off of your pay pal'),
-                      ("people rent out their house for travelers.", 'lunch'),
-                      ("people rent out their house for travelers.", 'hello world'),
-                      ("people rent out their house for travelers.", 'if you want'),
-                      ("people rent out their house for travelers.", 'What is your name'),
-                      ("people rent out their house for travelers.",
-                       'but it is being canceled and i need you to delete it off of your pay pal'),
+        test_pairs = [("google play store gift card,", "so i can buy movies to put on tablet"),
+                      (
+                          "my mom gave me twenty dollars for christmas yesterday,",
+                          "so i can buy movies to put on tablet"),
+                      ("how about we have a dinner tomorrow night?", "so i can buy movies to put on tablet"),
+                      ("i look forward to working with you in the following months,",
+                       "so i can buy movies to put on tablet"),
+                      ("what's the weather tomorrow?", "so i can buy movies to put on tablet"),
+                      ("can you resend last text,", "i deleted it by accident"),
+                      ("oh i've made a big mistake,", "i deleted it by accident"),
+                      ("what's the weather tomorrow?", "i deleted it by accident"),
+                      ("how about we have a dinner tomorrow night?", "i deleted it by accident"),
+                      ("i look forward to working with you in the following months,", "i deleted it by accident"),
+                      ("it always gets harder before it gets better.", "don't worry things will get better"),
+                      ("hi that isn't a big problem,", "don't worry things will get better"),
+                      ("i look forward to working with you in the following months,",
+                       "don't worry things will get better"),
+                      ("i think you'd be surprised how much zola would like a puppy.",
+                       "don't worry things will get better"),
+                      ("i've got to get taylor another bag for her makeup brushes.",
+                       "don't worry things will get better"),
+                      ("i just wanna spend some time with you.", "i feel we are not connecting on any level"),
+                      ("i want to go see a movie with you.", "i feel we are not connecting on any level"),
+                      ("i look forward to working with you in the following months,",
+                       "i feel we are not connecting on any level"),
+                      ("there is no help button.", "i feel we are not connecting on any level"),
+                      ("some of his comments throughout the post just rub me wrong.",
+                       "i feel we are not connecting on any level"),
+                      ("and the same for you.", "you can still talk to me as friends"),
+                      ("let's forget those unpleasant things.", "you can still talk to me as friends"),
+                      ("i look forward to working with you in the following months,",
+                       "you can still talk to me as friends"),
+                      ("what's the weather tomorrow?", "you can still talk to me as friends"),
+                      ("google play store gift card,", "you can still talk to me as friends"),
                       ]
-        output_lines = list()
+        rows = list()
+        rows2 = list()
         for s1, s2 in test_pairs:
-            p_s2_s1 = get_prob(s1, s2, mtest, session)
-            p_s2 = get_prob2(s2, mtest, session)
-            # result = p_s2_s1 - p_s2
-            print(s1 + '    ' + s2 + '    ' + str(p_s2_s1))
-            output_lines.append(s1 + '    ' + s2 + '    ' + str(p_s2_s1) + '\n')
-        open('/Users/liuduo/Desktop/result.txt', 'w').writelines(output_lines)
+            length_penalty_prob, first_letter_probs, every_letter_prob = get_prob(s1, s2, mtest, session)
+            rows.append([s1] + [length_penalty_prob] + every_letter_prob)
+            keys = []
+            values = []
+            for k in sorted(first_letter_probs.keys()):
+                keys.append(k)
+                values.append(first_letter_probs[k])
+            rows2.append(keys)
+            rows2.append(values)
+        with open('/Users/liuduo/Desktop/result.csv', 'w') as fd:
+            fd_csv = csv.writer(fd)
+            fd_csv.writerows(rows)
+        with open('/Users/liuduo/Desktop/result2.csv', 'w') as fd:
+            fd_csv = csv.writer(fd)
+            fd_csv.writerows(rows2)
 
 
 def get_prob2(s1, mtest, session):
@@ -150,8 +134,8 @@ def get_prob(s1, s2, mtest, session):
     s2_probs = list()
     for i, char in enumerate(s2_chars):
         if i == 0:
-            top_indices = np.argsort(prob.reshape(-1) * -1)[:5]
-            first_letter_probs = OrderedDict([(idx_to_char[x], prob.reshape(-1)[x]) for x in top_indices])
+            top_indices = np.argsort(prob.reshape(-1) * -1)
+            first_letter_probs = dict([(idx_to_char[x], prob.reshape(-1)[x]) for x in top_indices])
         idx = char_to_idx[char]
         s2_probs.append(prob.reshape(-1)[idx])
         prob, _state = run_epoch(session, mtest, np.int32([idx]), tf.no_op(), _state)
