@@ -14,16 +14,13 @@ config_tf.intra_op_parallelism_threads = 1
 
 file = sys.argv[1]
 data = open(file, 'r').read()
-chars = list(set(data))  # char vocabulary
+chars = sorted(list(set(data)))  # char vocabulary
 
 data_size, _vocab_size = len(data), len(chars)
 print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + ' ' + 'data has %d characters, %d unique.' % (
     data_size, _vocab_size))
-if data_size == 707400467 and os.path.exists(Config.Config().model_dir + '/vocab.bin'):
-    char_to_idx, idx_to_char = _pickle.load(open(Config.Config().model_dir + '/vocab.bin', 'rb'))
-else:
-    char_to_idx = {ch: i for i, ch in enumerate(chars)}
-    idx_to_char = {i: ch for i, ch in enumerate(chars)}
+char_to_idx = {ch: i for i, ch in enumerate(chars)}
+idx_to_char = {i: ch for i, ch in enumerate(chars)}
 
 config = Config.Config()
 config.vocab_size = _vocab_size
@@ -63,9 +60,11 @@ def run_epoch(session, m, data, eval_op):
     model_saver = tf.train.Saver(tf.global_variables())
     for step, (x, y) in enumerate(data_iterator(data, m.batch_size,
                                                 m.num_steps)):
+        masks = get_masks(x, y)
         cost, state, _ = session.run([m.cost, m.final_state, eval_op],  # x和y的shape都是(batch_size, num_steps)
                                      {m.input_data: x,
                                       m.targets: y,
+                                      m.masks: masks,
                                       m.initial_state: state})
         costs += cost
         iters += m.num_steps
@@ -83,9 +82,20 @@ def run_epoch(session, m, data, eval_op):
     return np.exp(costs / iters)
 
 
+def get_masks(x, y):
+    reshape_masks = []
+    reshape_x = x.reshape(-1)
+    reshape_y = y.reshape(-1)
+    for i, e in enumerate(reshape_y):
+        if reshape_x[i] == 0:
+            reshape_masks.append(100)
+        else:
+            reshape_masks.append(1)
+    return np.reshape(reshape_masks, [config.batch_size, config.num_steps])
+
+
 def main(_):
     train_data = context_of_idx
-
     with tf.Graph().as_default(), tf.Session(config=config_tf) as session:
         initializer = tf.random_uniform_initializer(-config.init_scale,
                                                     config.init_scale)

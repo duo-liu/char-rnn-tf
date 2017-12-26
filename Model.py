@@ -11,6 +11,7 @@ class Model(object):
 
         self._input_data = tf.placeholder(tf.int32, [batch_size, num_steps])
         self._targets = tf.placeholder(tf.int32, [batch_size, num_steps])  # 声明输入变量x, y
+        self._masks = tf.placeholder(tf.float32, [batch_size, num_steps])
 
         lstm_cell = tf.contrib.rnn.BasicLSTMCell(size, forget_bias=0.0, state_is_tuple=False)
         if is_training and config.keep_prob < 1:
@@ -49,7 +50,7 @@ class Model(object):
         loss = tf.contrib.legacy_seq2seq.sequence_loss_by_example(
             [logits],
             [tf.reshape(self._targets, [-1])],
-            [tf.ones([batch_size * num_steps])])
+            [tf.reshape(self._masks, [-1])])
         self._cost = cost = tf.reduce_sum(loss) / batch_size
 
         tvars = tf.trainable_variables()
@@ -81,3 +82,7 @@ class Model(object):
     @property
     def train_op(self):
         return self._train_op
+
+    @property
+    def masks(self):
+        return self._masks
